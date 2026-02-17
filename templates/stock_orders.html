@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>📦 Órdenes de Ingreso de Stock</h2>
+
+{% if stock_orders %}
+
+    {% for order in stock_orders %}
+
+        <div class="card my-4 shadow-sm">
+
+            <div class="card-header d-flex justify-content-between">
+                <span>
+                    Orden de Stock #{{ order.id }}
+                </span>
+                <small>
+                    {{ order.created_at.strftime("%d/%m/%Y %H:%M") }}
+                </small>
+            </div>
+
+            <div class="card-body">
+
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Marca</th>
+                            <th>Talle</th>
+                            <th>Color</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    {% for sop in order.stock_order_products %}
+
+                        <tr>
+
+                            <td>
+                                {{ sop.product.clothes.name }}
+                            </td>
+
+                            <td>
+                                {{ sop.product.clothes.brand.name }}
+                            </td>
+
+                            <td>
+                                {{ sop.product.size.name }}
+                            </td>
+
+                            <td>
+                                <div style="
+                                    width:20px;
+                                    height:20px;
+                                    border-radius:50%;
+                                    border:1px solid #000;
+                                    background-color:
+                                        rgb({{ sop.product.color.red }},
+                                            {{ sop.product.color.green }},
+                                            {{ sop.product.color.blue }});
+                                ">
+                                </div>
+                            </td>
+
+                            <td>
+                                {{ sop.amount }}
+                            </td>
+
+                            <td>
+                                ${{ sop.price }}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+{% else %}
+
+    <div class="alert alert-info">
+        No hay órdenes de stock registradas.
+    </div>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

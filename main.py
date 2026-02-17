@@ -81,8 +81,6 @@ def unauthorized():
 
 
 # CREATE DATABASE
-import os
-
 database_url = os.getenv("DATABASE_URL")
 
 if database_url:
@@ -947,6 +945,38 @@ def new_product_page():
     return render_template("nuevo_producto.html", form=form)
 
 
+# Historial de órdenes de stock (SOLO ADMIN)
+@app.route("/stock/orders")
+@admin_only
+def stock_orders_page():
+
+    stock_orders = (
+        Stock_order.query
+        .options(
+            joinedload(Stock_order.stock_order_products)
+            .joinedload(Stock_order_product.product)
+            .joinedload(Product.clothes)
+            .joinedload(Clothes.brand),
+
+            joinedload(Stock_order.stock_order_products)
+            .joinedload(Stock_order_product.product)
+            .joinedload(Product.size),
+
+            joinedload(Stock_order.stock_order_products)
+            .joinedload(Stock_order_product.product)
+            .joinedload(Product.color),
+        )
+        .order_by(Stock_order.id.desc())
+        .all()
+    )
+
+    return render_template(
+        "stock_orders.html",
+        stock_orders=stock_orders
+    )
+
+
+
 # Muestra graficos de ganancias en el tiempo, productos vendidos por prenda y por talle, con filtros disponibles
 @app.route('/analytics', methods=["GET"])
 @admin_only
@@ -1080,13 +1110,32 @@ def analytics_data():
 
     for op in sales:
         clothes_counter[op.clothes_name] = (
-            clothes_counter.get(op.clothes_name,0)
-            + op.amount
+                clothes_counter.get(op.clothes_name, 0)
+                + op.amount
         )
 
+    # Ordenar por cantidad descendente
+    sorted_clothes = sorted(
+        clothes_counter.items(),
+        key=lambda x: x[1],
+        reverse=True
+    )
+
+    top_5 = sorted_clothes[:5]
+    others = sorted_clothes[5:]
+
+    labels = [item[0] for item in top_5]
+    values = [item[1] for item in top_5]
+
+    # Si hay más de 5 productos, agrupar el resto
+    if others:
+        otros_total = sum(item[1] for item in others)
+        labels.append("Otros")
+        values.append(otros_total)
+
     clothes_data = {
-        "labels":list(clothes_counter.keys()),
-        "values":list(clothes_counter.values())
+        "labels": labels,
+        "values": values
     }
 
     # =====================

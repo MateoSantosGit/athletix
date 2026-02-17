@@ -92,61 +92,160 @@ let revenueChart;
 let clothesChart;
 let sizeChart;
 
+function getRandomColor() {
+    const colors = [
+        "#ff6b00",
+        "#111111",
+        "#1f2937",
+        "#3b82f6",
+        "#16a34a",
+        "#f59e0b"
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
 async function loadData(){
 
-const month = document.getElementById("month-filter").value;
-const clothing = document.getElementById("clothing-filter").value;
+    const month = document.getElementById("month-filter").value;
+    const clothing = document.getElementById("clothing-filter").value;
 
-const params = new URLSearchParams();
+    const params = new URLSearchParams();
 
-if(month) params.append("month_year",month);
-if(clothing) params.append("clothing_type_id",clothing);
+    if(month) params.append("month_year",month);
+    if(clothing) params.append("clothing_type_id",clothing);
 
-const res = await fetch("/analytics/data?"+params.toString());
-const data = await res.json();
+    const res = await fetch("/analytics/data?"+params.toString());
+    const data = await res.json();
 
-renderRevenue(data.revenue);
-renderClothes(data.clothes);
-renderSizes(data.sizes);
-
+    renderRevenue(data.revenue);
+    renderClothes(data.clothes);
+    renderSizes(data.sizes);
+}
 
 function renderRevenue(data){
 
-if(revenueChart) revenueChart.destroy();
+    if(revenueChart) revenueChart.destroy();
 
-revenueChart = new Chart(
-document.getElementById("revenueChart"),
-{
-type:"line",
-data:{labels:data.labels,datasets:[{data:data.values}]}
-});
+    revenueChart = new Chart(
+        document.getElementById("revenueChart"),
+        {
+            type:"line",
+            data:{
+                labels:data.labels,
+                datasets:[{
+                    data:data.values,
+                    borderColor:"#ff6b00",
+                    backgroundColor:"rgba(255,107,0,0.1)",
+                    tension:0.3,
+                    fill:true
+                }]
+            },
+            options:{
+                plugins:{
+                    legend:{
+                        display:false
+                    }
+                }
+            }
+        }
+    );
 }
+
 
 function renderClothes(data){
 
-if(clothesChart) clothesChart.destroy();
+    if(clothesChart) clothesChart.destroy();
 
-clothesChart = new Chart(
-document.getElementById("clothesChart"),
-{
-type:"pie",
-data:{labels:data.labels,datasets:[{data:data.values}]}
-});
+    const colorPalette = [
+        "#ff6b00",
+        "#111111",
+        "#1f2937",
+        "#3b82f6",
+        "#16a34a",
+        "#f59e0b",
+        "#dc2626",
+        "#9333ea",
+        "#0ea5e9",
+        "#22c55e"
+    ];
+
+    const backgroundColors = data.labels.map((label, index) => {
+        if (label === "Otros") return "#6c757d";
+        return colorPalette[index % colorPalette.length];
+    });
+
+    clothesChart = new Chart(
+        document.getElementById("clothesChart"),
+        {
+            type: "pie",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.values,
+                    backgroundColor: backgroundColors
+                }]
+            },
+            options: {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+
+                                const label = context.label;
+                                const value = context.raw;
+
+                                const datasetValues = context.dataset.data;
+                                const total = datasetValues.reduce((a, b) => a + b, 0);
+
+                                const percentage = ((value / total) * 100).toFixed(2);
+
+                                return `${label}: ${value.toLocaleString()} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
 }
+
 
 function renderSizes(data){
 
-if(sizeChart) sizeChart.destroy();
+    if(sizeChart) sizeChart.destroy();
 
-sizeChart = new Chart(
-document.getElementById("sizeChart"),
-{
-type:"pie",
-data:{labels:data.labels,datasets:[{data:data.values}]}
-});
-}
+    sizeChart = new Chart(
+        document.getElementById("sizeChart"),
+        {
+            type: "pie",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.values
+                }]
+            },
+            options: {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
 
-container.innerHTML=html;
+                                const label = context.label;
+                                const value = context.raw;
+
+                                const datasetValues = context.dataset.data;
+                                const total = datasetValues.reduce((a, b) => a + b, 0);
+
+                                const percentage = ((value / total) * 100).toFixed(2);
+
+                                return `${label}: ${value.toLocaleString()} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
 }
 
 document
@@ -160,5 +259,6 @@ document
 loadData();
 
 </script>
+
 
 {% endblock %}

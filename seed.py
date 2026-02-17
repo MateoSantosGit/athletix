@@ -10,6 +10,8 @@ from tables.models import (
     Product,
     User_order,
     Order_product,
+    Stock_order_product,
+    Stock_order
 )
 
 from werkzeug.security import generate_password_hash
@@ -51,7 +53,7 @@ with app.app_context():
 
     if not User.query.filter_by(username="admin").first():
         admin = User(
-            username="admin",
+            username=os.getenv("ADMIN_NAME"),
             password=generate_password_hash(
                 os.getenv("ADMIN_PASSWORD"),
                 method="pbkdf2:sha256",
@@ -92,21 +94,23 @@ with app.app_context():
     if not Clothes.query.first():
 
         sample_clothes = [
-            ("Remera Básica", 1500),
-            ("Jean 511", 3000),
-            ("Campera Pro", 7000),
-            ("Short Runner", 2000),
+            ("Remera Básica", 1500, 1, "4f65c450f4994b9d8f6e57e8fd514cc1.jpg"),
+            ("Musculosa", 3000, 1, "musculosa.jpg"),
+            ("Campera Pro", 7000, 3, "campera_pro.jpg"),
+            ("Short Runner", 2000, 4, "short.jpg"),
+            ("Jogging", 3500, 2, "jogging.jpeg"),
+            ("Campera nautica", 9000, 3, "campera_nautica.jpg")
         ]
 
-        for i, (name, price) in enumerate(sample_clothes):
+        for i, (name, price, tipo, img) in enumerate(sample_clothes):
 
             c = Clothes(
                 name=name,
                 price=price,
-                image_filename=UPLOAD_IMAGE,
-                image_path=f"/static/uploads/{UPLOAD_IMAGE}",
+                image_filename=img,
+                image_path=f"/static/uploads/{img}",
                 brand=brand,
-                clothing_type=types[i % len(types)],
+                clothing_type=types[tipo-1],
                 discontinued=False
             )
 
@@ -132,7 +136,7 @@ with app.app_context():
                     clothes=clothes,
                     size=size,
                     color=color1,
-                    stock=random.randint(0, 15)
+                    stock=random.randint(0, 70)
                 )
 
                 db.session.add(p)
@@ -185,6 +189,24 @@ with app.app_context():
 
         while current <= end_date:
 
+            # Asignar popularidad a cada product
+            product_weights = []
+
+            for p in products:
+
+                # base random leve
+                base = random.uniform(0.5, 1.5)
+
+                # hacer que algunas clothes sean más populares
+                if "Pro" in p.clothes.name:
+                    base *= 2.5
+
+                # talles M y L suelen vender más
+                if p.size.name in ["M", "L"]:
+                    base *= 1.8
+
+                product_weights.append(base)
+
             for user in users:
 
                 if random.random() < 0.1:
@@ -203,9 +225,11 @@ with app.app_context():
 
                 total = 0
 
+
+
                 for _ in range(random.randint(1, 3)):
 
-                    product = random.choice(products)
+                    product = random.choices(products, weights=product_weights, k=1)[0]
                     amount = random.randint(1, 3)
                     price = product.clothes.price
 
@@ -225,6 +249,24 @@ with app.app_context():
                 order.total = total
 
             current += timedelta(days=10)
+
+        #################################
+
+        if not Stock_order.query.first():
+            stock_order = Stock_order(
+                total=0
+            )
+            db.session.add(stock_order)
+            db.session.flush()
+
+            stock_order_product = Stock_order_product(
+                stock_order=stock_order,
+                amount=2,
+                price=7000,
+                product=random.choice(products)
+            )
+            db.session.add(stock_order_product)
+
 
         db.session.commit()
 

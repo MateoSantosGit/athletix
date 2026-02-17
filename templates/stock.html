@@ -6,10 +6,17 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
 <h2>Gestión de Stock</h2>
 
-<a href="{{ url_for('new_product_page') }}"
-   class="btn btn-primary">
-+ Agregar Producto
-</a>
+<div class="d-flex gap-2">
+    <a href="{{ url_for('stock_orders_page') }}"
+       class="btn btn-outline-dark">
+        Ver órdenes de stock
+    </a>
+
+    <a href="{{ url_for('new_product_page') }}"
+       class="btn btn-primary">
+        + Agregar Producto
+    </a>
+</div>
 </div>
 
 <div class="row">
