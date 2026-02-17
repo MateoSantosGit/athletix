@@ -13,7 +13,6 @@ from sqlalchemy import select, func, extract
 from datetime import datetime, timedelta
 import mercadopago
 from analytics.restock_engine import generate_restock_recommendations
-from apscheduler.schedulers.background import BackgroundScheduler
 
 
 load_dotenv()
@@ -91,7 +90,14 @@ if database_url:
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///athletix.db'
 
+if database_url:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        "pool_pre_ping": True,
+    }
+
+
 db.init_app(app)
+
 
 with app.app_context():
     from tables.models import Brand,Cart_item,Clothes,Color,Order_product,Product,Size,Stock_order_product,Stock_order,User_order,User, Clothing_type
@@ -1121,4 +1127,5 @@ def reorder_plan_page():
 
 
 if __name__ == "__main__":
-    app.run(debug=False, port=5001)
+    #app.run(debug=False, port=5001)
+    app.run(debug=False)
