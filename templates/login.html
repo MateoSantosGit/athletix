@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="text-center mb-4">Iniciar sesión</h3>
+
+                    <form method="POST" id="loginForm">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control") }}
+                            {% for error in form.username.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            {{ form.password(class="form-control") }}
+                            {% for error in form.password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-grid">
+                            {{ form.submit(
+                                class="btn btn-primary",
+                                id="submitBtn",
+                                data_loading_text="Ingresando..."
+                            ) }}
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <p class="text-center mb-0">
+                        ¿No tenés cuenta?
+                        <a href="{{ url_for('register') }}">Registrate</a>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById("loginForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const originalText = submitBtn.innerText;
+
+    form.addEventListener("submit", () => {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Ingresando...";
+    });
+</script>
+
+{% endblock %}

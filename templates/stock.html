@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container my-4">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+<h2>Gestión de Stock</h2>
+
+<a href="{{ url_for('new_product_page') }}"
+   class="btn btn-primary">
++ Agregar Producto
+</a>
+</div>
+
+<div class="row">
+
+{% for clothes in clothes_list %}
+
+<div class="col-md-6 col-lg-4 mb-4">
+
+<div class="card h-100 shadow-sm">
+
+<div class="p-3 text-center">
+<img src="{{ clothes.image_url }}"
+     class="img-fluid rounded"
+     style="max-height:220px; object-fit:contain;">
+</div>
+
+<div class="card-body">
+
+<h5>{{ clothes.name }}</h5>
+
+<p><strong>Marca:</strong> {{ clothes.brand.name }}</p>
+<p><strong>Tipo:</strong> {{ clothes.clothing_type.name }}</p>
+<p><strong>Precio:</strong> ${{ clothes.price }}</p>
+
+<!-- BOTONES NUEVOS -->
+<div class="d-grid gap-2 mb-3">
+
+<a href="{{ url_for('edit_clothes_page', clothes_id=clothes.id) }}"
+   class="btn btn-sm btn-outline-primary">
+Editar producto
+</a>
+
+<form method="POST"
+      action="{{ url_for('toggle_discontinued', clothes_id=clothes.id) }}">
+
+<button type="submit"
+        class="btn btn-sm {% if clothes.discontinued %}btn-outline-success{% else %}btn-outline-warning{% endif %}">
+{% if clothes.discontinued %}
+Activar producto
+{% else %}
+Discontinuar producto
+{% endif %}
+</button>
+
+</form>
+
+</div>
+
+<!-- ADD COLOR -->
+<form method="POST"
+      action="{{ url_for('add_color') }}"
+      class="mb-3">
+
+<input type="hidden"
+       name="clothes_id"
+       value="{{ clothes.id }}">
+
+<div class="d-flex gap-2">
+
+<input type="color"
+       name="color_value"
+       class="form-control form-control-color">
+
+<button type="submit"
+        class="btn btn-sm btn-outline-success">
++ Color
+</button>
+
+</div>
+
+</form>
+
+<hr>
+
+<h6>Productos</h6>
+
+{% for product in clothes.products %}
+
+<div class="stock-item">
+
+<div class="d-flex justify-content-between mb-2">
+
+<div class="d-flex gap-2 align-items-center">
+
+<div style="
+width:18px;
+height:18px;
+border-radius:50%;
+border:1px solid black;
+background-color: rgb(
+{{product.color.red}},
+{{product.color.green}},
+{{product.color.blue}}
+);
+"></div>
+
+<small>{{ product.size.name }}</small>
+
+</div>
+
+<span class="badge bg-dark">
+Stock: {{ product.stock }}
+</span>
+
+</div>
+
+<div class="d-flex gap-2 align-items-center">
+
+<form method="POST"
+      action="{{ url_for('remove_stock') }}">
+
+<input type="hidden"
+       name="product_id"
+       value="{{ product.id }}">
+
+<button type="submit"
+        class="btn btn-sm btn-outline-danger">
+-1
+</button>
+
+</form>
+
+<input type="number"
+       class="form-control form-control-sm stock-input"
+       data-product-id="{{ product.id }}"
+       min="0"
+       style="width:90px;"
+       placeholder="+">
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+</div>
+</div>
+
+{% endfor %}
+
+</div>
+
+<div class="text-end mt-4">
+<button type="button"
+        id="submit-stock-order"
+        class="btn btn-success btn-lg">
+Ingresar orden de productos
+</button>
+</div>
+
+</div>
+
+<script>
+
+document.getElementById("submit-stock-order")
+.addEventListener("click", async () => {
+
+const inputs = document.querySelectorAll(".stock-input");
+
+let items = [];
+
+inputs.forEach(input => {
+
+const amount = parseInt(input.value);
+
+if (!amount || amount <= 0) return;
+
+items.push({
+product_id: parseInt(input.dataset.productId),
+amount: amount
+});
+
+});
+
+if (items.length === 0) {
+alert("No agregaste stock a ningún producto");
+return;
+}
+
+const response = await fetch("/stock/order", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ items: items })
+});
+
+const data = await response.json();
+
+if (data.success) {
+location.reload();
+} else {
+alert(data.error);
+}
+
+});
+
+</script>
+
+{% endblock %}

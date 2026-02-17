@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container my-4">
+
+    <div class="text-end mb-4">
+
+<a href="{{ url_for('reorder_plan_page') }}"
+   class="btn btn-outline-dark">
+
+Plan de Reposición Inteligente
+
+</a>
+
+</div>
+
+
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row mb-4">
+
+<div class="col-md-4">
+
+<label>Mes</label>
+
+<select id="month-filter" class="form-select">
+
+<option value="">Todos</option>
+
+{% for m in meses %}
+<option value="{{m.value}}">
+{{m.label}}
+</option>
+{% endfor %}
+
+</select>
+
+</div>
+
+<div class="col-md-4">
+
+<label>Tipo de prenda</label>
+
+<select id="clothing-filter" class="form-select">
+
+<option value="">Todos</option>
+
+{% for ct in clothing_types %}
+<option value="{{ct.id}}">
+{{ct.name}}
+</option>
+{% endfor %}
+
+</select>
+
+</div>
+
+</div>
+
+<div class="card p-3 mb-4">
+<h5>Ingresos en el tiempo</h5>
+<canvas id="revenueChart"></canvas>
+</div>
+
+<div class="row">
+
+<div class="col-md-6">
+<div class="card p-3">
+<h5>Ventas por Prenda</h5>
+<canvas id="clothesChart"></canvas>
+</div>
+</div>
+
+<div class="col-md-6">
+<div class="card p-3">
+<h5>Ventas por Talle</h5>
+<canvas id="sizeChart"></canvas>
+</div>
+</div>
+
+</div>
+
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+let revenueChart;
+let clothesChart;
+let sizeChart;
+
+async function loadData(){
+
+const month = document.getElementById("month-filter").value;
+const clothing = document.getElementById("clothing-filter").value;
+
+const params = new URLSearchParams();
+
+if(month) params.append("month_year",month);
+if(clothing) params.append("clothing_type_id",clothing);
+
+const res = await fetch("/analytics/data?"+params.toString());
+const data = await res.json();
+
+renderRevenue(data.revenue);
+renderClothes(data.clothes);
+renderSizes(data.sizes);
+
+
+function renderRevenue(data){
+
+if(revenueChart) revenueChart.destroy();
+
+revenueChart = new Chart(
+document.getElementById("revenueChart"),
+{
+type:"line",
+data:{labels:data.labels,datasets:[{data:data.values}]}
+});
+}
+
+function renderClothes(data){
+
+if(clothesChart) clothesChart.destroy();
+
+clothesChart = new Chart(
+document.getElementById("clothesChart"),
+{
+type:"pie",
+data:{labels:data.labels,datasets:[{data:data.values}]}
+});
+}
+
+function renderSizes(data){
+
+if(sizeChart) sizeChart.destroy();
+
+sizeChart = new Chart(
+document.getElementById("sizeChart"),
+{
+type:"pie",
+data:{labels:data.labels,datasets:[{data:data.values}]}
+});
+}
+
+container.innerHTML=html;
+}
+
+document
+.getElementById("month-filter")
+.addEventListener("change",loadData);
+
+document
+.getElementById("clothing-filter")
+.addEventListener("change",loadData);
+
+loadData();
+
+</script>
+
+{% endblock %}

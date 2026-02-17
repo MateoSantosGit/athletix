@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-4">
+
+<h2>Checkout</h2>
+
+<div class="alert alert-info">
+Retire su pedido, con el número de orden que aparecerá en "Mi Carrito", en 1889 Avenida Triunvirato
+de 9:00 a 17:00 de lunes a domingo.
+</div>
+
+<table class="table table-hover align-middle">
+
+<thead>
+<tr>
+<th>Producto</th>
+<th>Talle</th>
+<th>Color</th>
+<th>Cantidad</th>
+<th>Total</th>
+</tr>
+</thead>
+
+<tbody>
+{% for item in cart_items %}
+<tr>
+
+<td>
+<img src="{{ item.product.clothes.image_url }}" width="60">
+{{ item.product.clothes.name }}
+<br>
+<small>{{ item.product.clothes.brand.name }}</small>
+</td>
+
+<td>{{ item.product.size.name }}</td>
+
+<td>
+<div style="
+width:20px;height:20px;border-radius:50%;
+background-color: rgb(
+{{item.product.color.red}},
+{{item.product.color.green}},
+{{item.product.color.blue}}
+);">
+</div>
+</td>
+
+<td>{{ item.amount }}</td>
+
+<td>
+${{ item.product.clothes.price * item.amount }}
+</td>
+
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+    <h4 class="text-end">
+        Total carrito: ${{cart_total}}
+    </h4>
+
+<div class="d-flex justify-content-between">
+<a href="{{ url_for('cart_page') }}" class="btn btn-secondary">
+Volver
+</a>
+
+<form action="{{ url_for('checkout_pay') }}" method="POST">
+<button class="btn btn-success">
+Realizar pago
+</button>
+</form>
+</div>
+
+</div>
+{% endblock %}

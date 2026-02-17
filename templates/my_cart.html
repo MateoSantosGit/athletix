@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>🛒 Mi carrito</h2>
+
+{% if cart_items %}
+
+<div class="card mb-4">
+<div class="card-body">
+
+<table class="table table-hover align-middle">
+
+<thead>
+<tr>
+<th></th>
+<th>Producto</th>
+<th>Marca</th>
+<th>Talle</th>
+<th>Color</th>
+<th>Cantidad</th>
+<th>Precio</th>
+<th>Subtotal</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for item in cart_items %}
+<tr class="{% if item.stock_error %}table-danger{% endif %}">
+
+<td>
+<form method="POST">
+<button
+name="remove_item"
+value="{{item.id}}"
+class="btn btn-sm btn-danger">
+🗑
+</button>
+</form>
+</td>
+
+<td>
+{{ item.product.clothes.name }}
+
+{% if item.stock_error %}
+<div class="text-danger">
+Stock insuficiente (disponible {{item.product.stock}})
+</div>
+{% endif %}
+</td>
+
+<td>{{item.product.clothes.brand.name}}</td>
+
+<td>{{item.product.size.name}}</td>
+
+
+<td>
+<div style="
+width:20px;
+height:20px;
+border-radius:50%;
+background-color:rgb(
+{{item.product.color.red}},
+{{item.product.color.green}},
+{{item.product.color.blue}}
+);"></div>
+</td>
+
+<td>{{item.amount}}</td>
+
+<td>${{item.product.clothes.price}}</td>
+
+<td>${{item.product.clothes.price * item.amount}}</td>
+
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+
+<h4 class="text-end fw-bold">
+Total carrito: ${{cart_total}}
+</h4>
+
+<div class="text-end">
+    <a href="{{ url_for('checkout_page') }}"
+   class="btn btn-success"
+    {% if cart_has_stock_error %}disabled{% endif %}>
+Realizar compra
+</a>
+
+</div>
+
+{% if cart_has_stock_error %}
+<div class="alert alert-danger mt-3">
+Hay productos sin stock suficiente. Ajustá el carrito antes de comprar.
+</div>
+{% endif %}
+
+</div>
+</div>
+
+{% else %}
+<p>No tenés productos en el carrito.</p>
+{% endif %}
+
+
+<hr class="my-5">
+
+<h3>📦 Historial de compras</h3>
+
+{% if user_orders %}
+
+    {% for order in user_orders %}
+
+    {% if order.status == "paid" %}
+
+        <div class="card my-3">
+
+            <div class="card-header d-flex justify-content-between">
+                <span>Orden {{order.order_number}}</span>
+                <button class="btn btn-sm btn-outline-secondary"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#order_{{order.id}}">
+                    Ver detalle
+                </button>
+            </div>
+
+            <div id="order_{{order.id}}" class="collapse">
+
+                <div class="card-body">
+
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Talle</th>
+                                <th>Color</th>
+                                <th>Precio Unidad</th>
+                                <th>Cantidad</th>
+                                <th>Precio Total</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                        {% for op in order.order_products %}
+
+                            <tr>
+
+                                <td>{{op.clothes_name}}</td>
+
+                                <td>{{op.size_name}}</td>
+
+                                <td>
+                                    <div style="
+                                        width:20px;
+                                        height:20px;
+                                        border-radius:50%;
+                                        border:1px solid #000;
+                                        background-color:
+                                            rgb({{op.product.color.red}},
+                                                {{op.product.color.green}},
+                                                {{op.product.color.blue}});
+                                    "></div>
+                                </td>
+
+                                <td>${{op.price}}</td>
+
+                                <td>{{op.amount}}</td>
+
+                                <td>${{op.amount * op.price}}</td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                    <h4 class="text-end fw-bold">
+                        Total orden: ${{order.total}}
+                    </h4>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+    {% endfor %}
+
+{% else %}
+
+    <p>No tenés compras todavía.</p>
+
+{% endif %}
+
+
+</div>
+
+{% endblock %}

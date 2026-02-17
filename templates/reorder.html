@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container my-4">
+
+<h2 class="mb-4">Plan de Restock Inteligente</h2>
+
+{% if not results %}
+<div class="alert alert-warning">
+No hay datos suficientes todavía.
+</div>
+{% else %}
+
+<table class="table table-hover align-middle restock-table">
+
+<thead class="table-dark">
+<tr>
+<th>Clothes</th>
+<th>Color</th>
+<th>Talle</th>
+<th>Stock Actual</th>
+<th>Demanda Predicha</th>
+<th>Stock Seguridad</th>
+<th>Restock Sugerido</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for r in results %}
+<tr>
+
+<td>{{ r.product.clothes.name }}</td>
+
+<td>
+<div style="
+width:18px;
+height:18px;
+border-radius:50%;
+border:1px solid black;
+background-color: rgb(
+{{r.product.color.red}},
+{{r.product.color.green}},
+{{r.product.color.blue}}
+);
+"></div>
+</td>
+
+<td>{{ r.product.size.name }}</td>
+
+<td>{{ r.product.stock }}</td>
+<td>{{ r.predicted }}</td>
+<td>{{ r.safety }}</td>
+
+<td>
+{% if r.restock > 0 %}
+<span class="badge bg-danger">
+{{ r.restock }}
+</span>
+{% else %}
+<span class="badge bg-success">
+OK
+</span>
+{% endif %}
+</td>
+
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

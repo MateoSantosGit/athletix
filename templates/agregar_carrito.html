@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5" style="max-width:520px;">
+
+    <!-- IMAGEN -->
+    <div class="text-center mb-4">
+        <img src="{{ clothes.image_url }}"
+             class="img-fluid rounded shadow-sm"
+             style="max-height:280px; object-fit:cover;">
+    </div>
+
+    <h3 class="mb-4 text-center">{{ clothes.name }}</h3>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <!-- COLOR -->
+        <div class="mb-3">
+
+            {{ form.color_id.label(class="form-label") }}
+
+            <div class="d-flex align-items-center gap-3">
+
+                {{ form.color_id(class="form-select", id="color-select") }}
+
+                <div id="color-preview"
+                     style="width:30px;height:30px;border-radius:50%;border:1px solid #ccc;">
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- TALLE -->
+        <div class="mb-3">
+            {{ form.product_id.label(class="form-label") }}
+            {{ form.product_id(class="form-select", id="size-select") }}
+        </div>
+
+        <!-- CANTIDAD -->
+        <div class="mb-3">
+            {{ form.amount.label(class="form-label") }}
+            {{ form.amount(class="form-control", id="amount-input", min="1", value="1") }}
+            <div id="stock-warning" class="text-danger small mt-1"></div>
+        </div>
+
+        <button id="submit-btn" class="btn btn-primary w-100">
+            Agregar al carrito
+        </button>
+
+    </form>
+
+</div>
+
+<script>
+
+const colorMap = {{ color_map | tojson }};
+const colorSelect = document.getElementById("color-select");
+const sizeSelect = document.getElementById("size-select");
+const amountInput = document.getElementById("amount-input");
+const submitBtn = document.getElementById("submit-btn");
+const stockWarning = document.getElementById("stock-warning");
+const colorPreview = document.getElementById("color-preview");
+
+let currentStock = 0;
+
+function updateSizes(){
+
+    const colorId = colorSelect.value;
+    sizeSelect.innerHTML = "";
+
+    if(!colorMap[colorId]) return;
+
+    const c = colorMap[colorId];
+
+    // preview RGB real
+    colorPreview.style.backgroundColor =
+        `rgb(${c.red}, ${c.green}, ${c.blue})`;
+
+    c.products.forEach(p => {
+
+        const opt = document.createElement("option");
+        opt.value = p.product_id;
+        opt.text = `Talle ${p.size} (Stock ${p.stock})`;
+        opt.dataset.stock = p.stock;
+
+        sizeSelect.appendChild(opt);
+    });
+
+    updateStock();
+}
+
+function updateStock(){
+
+    const selected = sizeSelect.selectedOptions[0];
+    if(!selected) return;
+
+    currentStock = parseInt(selected.dataset.stock);
+    validateAmount();
+}
+
+function validateAmount(){
+
+    const amount = parseInt(amountInput.value);
+
+    if(amount > currentStock){
+
+        submitBtn.disabled = true;
+        stockWarning.innerText =
+            "La cantidad supera el stock disponible";
+
+    }else{
+
+        submitBtn.disabled = false;
+        stockWarning.innerText = "";
+    }
+}
+
+colorSelect.addEventListener("change", updateSizes);
+sizeSelect.addEventListener("change", updateStock);
+amountInput.addEventListener("input", validateAmount);
+
+updateSizes();
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,327 @@
+/* =========================================
+   ATHLETIX - SPORT PERFORMANCE THEME
+   ========================================= */
+
+/* -----------------------
+   VARIABLES
+----------------------- */
+:root {
+    --ath-primary: #0d6efd;         /* Azul Bootstrap base */
+    --ath-dark: #0f172a;            /* Azul oscuro deportivo */
+    --ath-black: #0b0f19;
+    --ath-accent: #ff6b00;          /* Naranja energía */
+    --ath-light: #f4f6f9;
+    --ath-gray: #6c757d;
+    --ath-radius: 12px;
+}
+
+/* -----------------------
+   GLOBAL
+----------------------- */
+body {
+    background-color: var(--ath-light);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1, h2, h3, h4, h5 {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* -----------------------
+   NAVBAR
+----------------------- */
+.navbar {
+    background: linear-gradient(90deg, var(--ath-dark), #1e293b);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+.navbar-brand {
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.navbar .nav-link {
+    font-weight: 500;
+    transition: 0.2s ease;
+}
+
+.navbar .nav-link:hover {
+    color: var(--ath-accent) !important;
+}
+
+/* -----------------------
+   CARDS (PRODUCTOS)
+----------------------- */
+.card {
+    border: none;
+    border-radius: var(--ath-radius);
+    transition: all 0.25s ease;
+}
+
+.card.shadow-sm {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+.card-img-top {
+    transition: transform 0.3s ease;
+}
+
+.card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+/* -----------------------
+   BOTONES
+----------------------- */
+.btn-primary {
+    background-color: var(--ath-dark);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--ath-accent);
+    transform: translateY(-2px);
+}
+
+.btn-outline-dark {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-outline-dark:hover {
+    background-color: var(--ath-dark);
+    color: white;
+}
+
+/* -----------------------
+   FORMULARIOS
+----------------------- */
+.form-control,
+.form-select {
+    border-radius: 8px;
+    border: 1px solid #dcdcdc;
+    transition: 0.2s;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--ath-accent);
+    box-shadow: 0 0 0 0.2rem rgba(255,107,0,0.15);
+}
+
+/* -----------------------
+   ALERTAS
+----------------------- */
+.alert {
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+/* -----------------------
+   DASHBOARD CARDS
+----------------------- */
+canvas {
+    max-height: 300px;
+}
+
+.card h5 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+/* -----------------------
+   FOOTER
+----------------------- */
+.footer {
+    background-color: var(--ath-black) !important;
+    color: white;
+}
+
+.footer h5 {
+    color: white;
+}
+
+.footer small,
+.footer p {
+    color: #cbd5e1 !important;
+}
+
+.footer .text-primary {
+    color: var(--ath-accent) !important;
+}
+
+/* -----------------------
+   LOGIN / AUTH
+----------------------- */
+.card-body h3 {
+    font-weight: 700;
+}
+
+/* -----------------------
+   IMAGE PREVIEW COLOR
+----------------------- */
+#color-preview {
+    box-shadow: 0 0 6px rgba(0,0,0,0.15);
+}
+
+/* -----------------------
+   PRODUCT FILTER BAR
+----------------------- */
+select[name="type"] {
+    font-weight: 500;
+}
+
+/* -----------------------
+   MICRO ANIMATIONS
+----------------------- */
+button:active {
+    transform: scale(0.97);
+}
+
+/* -----------------------
+   RESPONSIVE TWEAKS
+----------------------- */
+@media (max-width: 768px) {
+
+    .card:hover {
+        transform: none;
+    }
+
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+
+}
+
+/* -----------------------
+   TABLAS DE TIENDA
+----------------------- */
+
+.table {
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: var(--ath-dark);
+    color: white;
+}
+
+.table th {
+    font-weight: 600;
+    letter-spacing: 0.4px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 107, 0, 0.05);
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* -----------------------
+   Boton success
+----------------------- */
+
+.btn-success {
+    background-color: var(--ath-accent);
+    border: none;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.btn-success:hover {
+    background-color: #e55f00;
+    transform: translateY(-2px);
+}
+
+/* -----------------------
+   CARRITO
+----------------------- */
+
+h2 {
+    position: relative;
+}
+
+h2::after {
+    content: "";
+    width: 60px;
+    height: 3px;
+    background-color: var(--ath-accent);
+    display: block;
+    margin-top: 8px;
+}
+
+
+/* -----------------------
+   ORDENES
+----------------------- */
+.card-header {
+    background-color: #f1f5f9;
+    font-weight: 600;
+}
+
+/* -----------------------
+   RESTOCK TABLE
+----------------------- */
+
+.restock-table .badge.bg-danger {
+    background-color: var(--ath-accent) !important;
+}
+
+.restock-table .badge.bg-success {
+    background-color: #16a34a !important;
+}
+
+
+/* -----------------------
+   STOCK ITEMS
+----------------------- */
+
+.stock-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    transition: 0.2s ease;
+}
+
+.stock-item:hover {
+    border-color: var(--ath-accent);
+    background-color: rgba(255, 107, 0, 0.04);
+}
+
+.stock-input {
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* -----------------------
+   ALERTS
+----------------------- */
+
+.alert-info {
+    background-color: #e0f2fe;
+    border: none;
+}
+
+.alert-warning {
+    border: none;
+}
+
+.alert-danger {
+    border: none;
+}
