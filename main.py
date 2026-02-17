@@ -20,6 +20,9 @@ load_dotenv()
 sdk = mercadopago.SDK(os.getenv("MP_ACCESS_TOKEN"))
 PUBLIC_URL = os.getenv("PUBLIC_URL")
 
+print("ACCESS TOKEN:", os.getenv("MP_ACCESS_TOKEN"))
+print("PUBLIC URL:", PUBLIC_URL)
+
 
 app = Flask(__name__)
 
