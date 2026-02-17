@@ -20,9 +20,7 @@ load_dotenv()
 sdk = mercadopago.SDK(os.getenv("MP_ACCESS_TOKEN"))
 PUBLIC_URL = os.getenv("PUBLIC_URL")
 
-print("ACCESS TOKEN:", os.getenv("MP_ACCESS_TOKEN"))
-print("PUBLIC URL:", PUBLIC_URL)
-
+print(sdk)
 
 app = Flask(__name__)
 
@@ -571,6 +569,7 @@ def checkout_pay():
             "auto_return": "approved",
 
         }
+        print(preference_data)
 
         pref = sdk.preference().create(preference_data)
 
