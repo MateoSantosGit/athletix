@@ -574,6 +574,8 @@ def checkout_pay():
         pref = sdk.preference().create(preference_data)
 
         print("MP PREF RESPONSE:", pref)
+        print(f"status: {pref['status']}")
+        print(f"body: {pref['response']}")
 
         if pref["status"] != 201:
             raise Exception(pref)
