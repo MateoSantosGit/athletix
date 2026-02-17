@@ -28,7 +28,7 @@ def run_seed():
     with app.app_context():
 
         # Workaround para no pagar por el shell de Render
-        if not Clothing_type.query.first():
+        if not User.query.filter_by(username=os.getenv("ADMIN_NAME")).first():
 
             # ---------------------------------
             # BASE DATA

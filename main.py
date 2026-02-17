@@ -97,9 +97,12 @@ if database_url:
 db.init_app(app)
 
 
+
 with app.app_context():
     from tables.models import Brand,Cart_item,Clothes,Color,Order_product,Product,Size,Stock_order_product,Stock_order,User_order,User, Clothing_type
+    from seed import run_seed
     db.create_all()
+    run_seed()
 
 
 
