@@ -3,7 +3,7 @@ from flask_bootstrap import Bootstrap
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user, login_required
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
-from forms import RegisterForm, LoginForm, NuevoClothesForm, AgregarCarritoForm, StockOrderForm, StockOrderItemForm, EditClothesForm
+from forms import RegisterForm, LoginForm, NuevoClothesForm, AgregarCarritoForm, EditClothesForm
 from extensions import db
 from dotenv import load_dotenv
 import os
@@ -104,6 +104,10 @@ with app.app_context():
     db.create_all()
 
 
+
+@app.before_request
+def handle_expirations():
+    expire_pending_orders()
 
 
 # Solo permite usuarios admin
