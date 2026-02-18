@@ -20,7 +20,6 @@ load_dotenv()
 sdk = mercadopago.SDK(os.getenv("MP_ACCESS_TOKEN"))
 PUBLIC_URL = os.getenv("PUBLIC_URL")
 
-print(sdk)
 
 app = Flask(__name__)
 
@@ -104,7 +103,6 @@ with app.app_context():
     from seed import run_seed
     db.create_all()
     run_seed()
-
 
 
 @app.before_request
@@ -569,13 +567,12 @@ def checkout_pay():
             "auto_return": "approved",
 
         }
-        print(preference_data)
+
 
         pref = sdk.preference().create(preference_data)
 
         print("MP PREF RESPONSE:", pref)
-        print(f"status: {pref['status']}")
-        print(f"body: {pref['response']}")
+
 
         if pref["status"] != 201:
             raise Exception(pref)
@@ -611,6 +608,7 @@ def mp_webhook():
 
         mo = sdk.merchant_order().get(merchant_url.split("/")[-1])
         payments = mo["response"]["payments"]
+        print(payments)
 
         for p in payments:
 
@@ -627,7 +625,7 @@ def mp_webhook():
                 if not order:
                     return "OK", 200
 
-                if order.status == "expired":
+                if order.status == "expired" or order.status=="pending":
                     # llegó pago tarde
                     order.status = "paid"
                     order.order_number = str(p["id"])
@@ -1187,5 +1185,5 @@ def reorder_plan_page():
 
 
 if __name__ == "__main__":
-    #app.run(debug=False, port=5001)
-    app.run(debug=False)
+    app.run(debug=False, port=5001)
+    #app.run(debug=False)
