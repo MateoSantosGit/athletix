@@ -100,9 +100,9 @@ db.init_app(app)
 
 with app.app_context():
     from tables.models import Brand,Cart_item,Clothes,Color,Order_product,Product,Size,Stock_order_product,Stock_order,User_order,User, Clothing_type
-    from seed import run_seed
+    #from seed import run_seed
     db.create_all()
-    run_seed()
+    #run_seed()
 
 
 @app.before_request
@@ -513,7 +513,7 @@ def checkout_pay():
             total=0,
             status="pending",
             created_at=datetime.utcnow(),
-            expires_at=datetime.utcnow() + timedelta(minutes=15)
+            expires_at=datetime.utcnow() + timedelta(minutes=3)
 
         )
 
@@ -631,6 +631,48 @@ def mp_webhook():
                     order.order_number = str(p["id"])
                     db.session.commit()
                     return "OK", 200
+
+            # DEBERIA FUNCIONAR EN CON CREDENCIALES DE PRODUCCION
+            # if payment["response"]["status"] == "approved":
+            #
+            #     order_id = int(payment["response"]["external_reference"])
+            #     order = User_order.query.get(order_id)
+            #
+            #     if not order:
+            #         return "OK", 200
+            #
+            #     if order.status in ["paid", "refunded"]:
+            #         return "OK", 200
+            #
+            #
+            #
+            #     now = datetime.utcnow()
+            #
+            #     # 🚨 pago fuera de tiempo
+            #     if order.expires_at and now > order.expires_at:
+            #         print("Pago recibido fuera de tiempo. Iniciando devolución.")
+            #
+            #         refund = sdk.refund().create(
+            #             p["id"],
+            #             {}
+            #         )
+            #
+            #         if refund["status"] != 201:
+            #             print("Error creando refund:", refund)
+            #             flash("Error iniciando pago", "danger")
+            #             return "OK", 200
+            #
+            #         order.status = "refunded"
+            #         print("Refund exitoso")
+            #         db.session.commit()
+            #
+            #         return "OK", 200
+            #
+            #     # ✅ pago válido
+            #     if order.status == "pending":
+            #         order.status = "paid"
+            #         order.order_number = str(p["id"])
+            #         db.session.commit()
 
     return "OK", 200
 
@@ -1160,11 +1202,55 @@ def analytics_data():
         "values":list(size_counter.values())
     }
 
+    # =====================
+    #  Sales Table
+    # =====================
+
+    table_query = (
+        db.session.query(
+            Clothes.name.label("clothes_name"),
+            func.sum(Order_product.amount).label("total_sold"),
+            func.sum(Order_product.amount * Order_product.price).label("total_revenue")
+        )
+        .join(Product, Product.id == Order_product.product_id)
+        .join(Clothes, Clothes.id == Product.clothes_id)
+        .join(User_order, User_order.id == Order_product.user_order_id)
+        .filter(User_order.status == "paid")
+    )
+
+    if year:
+        table_query = table_query.filter(
+            extract("year", User_order.created_at) == year,
+            extract("month", User_order.created_at) == month
+        )
+
+    if clothing_type_id:
+        table_query = table_query.filter(
+            Clothes.clothing_type_id == clothing_type_id
+        )
+
+    table_query = (
+        table_query
+        .group_by(Clothes.name)
+        .order_by(func.sum(Order_product.amount * Order_product.price).desc())
+        .all()
+    )
+
+    table_data = []
+
+    for row in table_query:
+        table_data.append({
+            "name": row.clothes_name,
+            "units": int(row.total_sold or 0),
+            "revenue": float(row.total_revenue or 0)
+        })
+
 
     return jsonify({
         "revenue":revenue_data,
         "clothes":clothes_data,
         "sizes":size_data,
+        "table":table_data,
 
     })
 

@@ -80,6 +80,24 @@ Plan de Reposición Inteligente
 
 </div>
 
+    <div class="card p-3 mt-4">
+    <h5>Detalle de Ventas</h5>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Unidades Vendidas</th>
+                    <th>Ingresos</th>
+                </tr>
+            </thead>
+            <tbody id="sales-table-body">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
 
 
 </div>
@@ -120,6 +138,37 @@ async function loadData(){
     renderRevenue(data.revenue);
     renderClothes(data.clothes);
     renderSizes(data.sizes);
+    renderTable(data.table);
+}
+
+function renderTable(data){
+
+    const tbody = document.getElementById("sales-table-body");
+    tbody.innerHTML = "";
+
+    if(data.length === 0){
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="3" class="text-center text-muted">
+                    No hay ventas para los filtros seleccionados
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    data.forEach(item => {
+
+        const row = `
+            <tr>
+                <td>${item.name}</td>
+                <td>${item.units.toLocaleString()}</td>
+                <td>$ ${item.revenue.toLocaleString()}</td>
+            </tr>
+        `;
+
+        tbody.innerHTML += row;
+    });
 }
 
 function renderRevenue(data){
