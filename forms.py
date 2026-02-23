@@ -4,7 +4,7 @@ from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms.validators import DataRequired, URL, ValidationError
 from flask_ckeditor import CKEditorField
 from tables.models import User
-from wtforms.validators import DataRequired, Length, NumberRange
+from wtforms.validators import DataRequired, Length, NumberRange, Email
 from wtforms import HiddenField, FieldList, FormField
 
 class RegisterForm(FlaskForm):
@@ -13,6 +13,15 @@ class RegisterForm(FlaskForm):
         validators=[
             DataRequired(),
             Length(min=4, max=50)
+        ]
+    )
+
+    email = StringField(
+        "Correo electrónico",
+        validators=[
+            DataRequired(),
+            Email(message="Ingresá un email válido"),
+            Length(max=150)
         ]
     )
 
@@ -29,6 +38,10 @@ class RegisterForm(FlaskForm):
     def validate_username(self, field):
         if User.query.filter_by(username=field.data).first():
             raise ValidationError("El nombre de usuario ya existe")
+
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError("El correo electrónico ya está registrado")
 
 class LoginForm(FlaskForm):
     username = StringField(

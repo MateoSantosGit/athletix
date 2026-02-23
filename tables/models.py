@@ -290,6 +290,12 @@ class User(UserMixin, db.Model):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(100), unique=True)
+    email: Mapped[str] = mapped_column(
+        String(150),
+        unique=True,
+        nullable=False,
+        index=True
+    )
     password: Mapped[str] = mapped_column(String(255))
     is_admin: Mapped[bool] = mapped_column(Boolean)
 

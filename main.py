@@ -13,6 +13,9 @@ from sqlalchemy import select, func, extract
 from datetime import datetime, timedelta
 import mercadopago
 from analytics.restock_engine import generate_restock_recommendations
+from flask_mail import Mail, Message
+from smtplib import SMTPException
+import traceback
 
 
 load_dotenv()
@@ -30,6 +33,12 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 IMAGE_SIZE = (800, 800)  # tamaño estándar
 
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_USERNAME")
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 Bootstrap(app)
@@ -96,6 +105,50 @@ if database_url:
 
 db.init_app(app)
 
+mail = Mail(app)
+
+def send_order_confirmation_email(order):
+
+    user = order.user
+
+    subject = f"Confirmación de compra - Orden #{order.id}"
+
+    body = f"""
+Hola {user.username},
+
+Tu pago fue aprobado correctamente ✅
+
+Puede retirar su pedido en 1889 Avenida Triunvirato de 9:00 a 17:00 de lunes a domingo.
+
+Número de orden: {order.order_number}
+Estado: PAGADO
+
+Gracias por confiar en ATHLETIX.
+
+Equipo ATHLETIX
+"""
+
+    msg = Message(
+        subject=subject,
+        recipients=[user.email],
+        body=body
+    )
+
+    try:
+        mail.send(msg)
+        print(f"📧 Mail enviado correctamente a {user.email}")
+
+    except SMTPException as e:
+        print("❌ Error SMTP enviando mail:")
+        flash("Error al enviar el mail, pero la compra fue realizada exitosamente. Utilize el número de envío para retirarla en el local", category="danger")
+        print(str(e))
+        traceback.print_exc()
+
+    except Exception as e:
+        print("❌ Error inesperado enviando mail:")
+        flash("Error al enviar el mail, pero la compra fue realizada exitosamente. Utilize el número de envío para retirarla en el local", category="danger")
+        print(str(e))
+        traceback.print_exc()
 
 
 with app.app_context():
@@ -302,6 +355,7 @@ def register():
     if form.validate_on_submit():
         new_user = User(
             username=form.username.data,
+            email=form.email.data,
             password=generate_password_hash(
                 form.password.data,
                 method='pbkdf2:sha256',
@@ -614,7 +668,7 @@ def mp_webhook():
 
             payment = sdk.payment().get(p["id"])
 
-            if payment["response"]["status"] == "approved":
+            if payment["response"]["status"] == "approved": #CON CREDENCIALES DE PRUEBA
 
                 order_id = int(
                     payment["response"]["external_reference"]
@@ -622,15 +676,30 @@ def mp_webhook():
 
                 order = User_order.query.get(order_id)
 
-                if not order:
+                if not order or order.status=="paid":
                     return "OK", 200
 
-                if order.status == "expired" or order.status=="pending":
-                    # llegó pago tarde
+                if order.status in ["expired", "pending"]:
                     order.status = "paid"
                     order.order_number = str(p["id"])
-                    db.session.commit()
+
+                    try:
+                        db.session.commit()
+                    except Exception as e:
+                        db.session.rollback()
+                        print("❌ Error guardando orden:", e)
+                        return "OK", 200  # MercadoPago igual necesita 200
+
+                    # Intentar enviar mail SIN romper webhook
+                    send_order_confirmation_email(order)
+
                     return "OK", 200
+                # if order.status == "expired" or order.status=="pending":
+                #     # llegó pago tarde
+                #     order.status = "paid"
+                #     order.order_number = str(p["id"])
+                #     db.session.commit()
+                #     return "OK", 200
 
             # DEBERIA FUNCIONAR EN CON CREDENCIALES DE PRODUCCION
             # if payment["response"]["status"] == "approved":
@@ -659,7 +728,7 @@ def mp_webhook():
             #
             #         if refund["status"] != 201:
             #             print("Error creando refund:", refund)
-            #             flash("Error iniciando pago", "danger")
+            #             flash("Error creando reembolso", "danger")
             #             return "OK", 200
             #
             #         order.status = "refunded"
